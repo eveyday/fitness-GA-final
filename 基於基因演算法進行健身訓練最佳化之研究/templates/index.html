@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>健身訓練菜單產生器</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">健身訓練菜單產生器</h1>
+      <p class="text-gray-600">根據您的資料產生專屬健身計畫</p>
+    </div>
+
+  <!-- 第一階段 -->
+  <div id="step1" class="bg-white p-6 rounded shadow-md space-y-4">
+    <h2 class="text-xl font-semibold text-blue-700">基本資料輸入</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-gray-700">姓名</label>
+        <input id="name" class="border w-full p-2 rounded" type="text">
+        <p id="error-name" class="text-red-500 text-sm hidden error-msg">請輸入姓名</p>
+      </div>
+      <div>
+        <label class="block text-gray-700">年齡</label>
+        <input id="age" class="border w-full p-2 rounded" type="number" min="1">
+        <p id="error-age" class="text-red-500 text-sm hidden error-msg">請輸入年齡</p>
+      </div>
+      <div>
+        <label class="block text-gray-700">身高 (cm)</label>
+        <input id="height" class="border w-full p-2 rounded" type="number" min="1">
+        <p id="error-height" class="text-red-500 text-sm hidden error-msg">請輸入身高</p>
+      </div>
+      <div>
+        <label class="block text-gray-700">體重 (kg)</label>
+        <input id="weight" class="border w-full p-2 rounded" type="number" min="1">
+        <p id="error-weight" class="text-red-500 text-sm hidden error-msg">請輸入體重</p>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-gray-700">訓練等級</label>
+      <select id="level" class="border w-full p-2 rounded">
+        <option value="">-- 請選擇 --</option>
+        <option value="beginner">初學者</option>
+        <option value="intermediate">中階</option>
+        <option value="advanced">進階</option>
+      </select>
+      <p id="error-level" class="text-red-500 text-sm hidden error-msg">請選擇訓練等級</p>
+    </div>
+
+    <div>
+      <label class="block text-gray-700">訓練目標</label>
+      <div class="flex gap-4 mt-1">
+        <label><input type="radio" name="goal" value="muscle_gain"> 增肌</label>
+        <label><input type="radio" name="goal" value="fat_loss"> 減脂</label>
+      </div>
+      <p id="error-goal" class="text-red-500 text-sm hidden error-msg">請選擇訓練目標</p>
+    </div>
+    <div>
+      <label class="block text-gray-700">欲加強訓練部位（選填）</label>
+      <select id="target_muscles" class="border w-full p-2 rounded">
+        <option value="">-- 無特別加強部位 --</option>
+        <option value="胸">胸</option>
+        <option value="背">背</option>
+        <option value="腿">腿</option>
+        <option value="手臂">手臂</option>
+        <option value="肩">肩</option>
+        <option value="臀">臀</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-gray-700">每週訓練日 (複選)</label>
+      <div class="grid grid-cols-4 gap-2">
+        <label><input type="checkbox" value="Day1" class="training-day"> 星期一</label>
+        <label><input type="checkbox" value="Day2" class="training-day"> 星期二</label>
+        <label><input type="checkbox" value="Day3" class="training-day"> 星期三</label>
+        <label><input type="checkbox" value="Day4" class="training-day"> 星期四</label>
+        <label><input type="checkbox" value="Day5" class="training-day"> 星期五</label>
+        <label><input type="checkbox" value="Day6" class="training-day"> 星期六</label>
+        <label><input type="checkbox" value="Day7" class="training-day"> 星期天</label>
+      </div>
+      <p id="error-days" class="text-red-500 text-sm hidden error-msg">請選擇 3~5 天的訓練日</p>
+    </div>
+
+    <button onclick="nextStep()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">下一步</button>
+  </div>
+  <!-- 第二階段 -->
+  <div id="step2" class="hidden bg-white p-6 mt-6 rounded shadow-md space-y-4">
+    <h2 class="text-xl font-semibold text-green-700">輸入代表性動作重量與次數</h2>
+
+    <div class="overflow-x-auto">
+      <table class="table-auto w-full border">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-2 py-1 border">動作名稱</th>
+            <th class="px-2 py-1 border">重量 (kg)</th>
+            <th class="px-2 py-1 border">次數</th>
+          </tr>
+        </thead>
+        <tbody id="exercise-table"></tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 p-4 bg-yellow-100 text-yellow-800 rounded border border-yellow-300">
+      <p class="font-semibold">🔔 初學者小提醒：</p>
+      <p>若您不確定自己的訓練重量，建議使用一個在第 10 次覺得有挑戰性、但仍能勉強完成 12 次的重量。</p>
+    </div>
+
+    <button onclick="prevStep()" class="bg-gray-400 text-white px-4 py-2 rounded mr-2">上一步</button>
+    <button onclick="submitForm()" class="bg-green-600 text-white px-4 py-2 rounded">產生訓練菜單</button>
+    <a href="/fitness-result" class="bg-purple-600 text-white px-4 py-2 rounded mt-4 inline-block">查看分析結果</a>
+  </div>
+
+    <!-- 結果顯示區 -->
+    <div id="result" class="hidden mt-8 bg-white p-6 rounded shadow-md">
+      <h2 class="text-xl font-semibold text-orange-700 mb-4">您的專屬訓練菜單</h2>
+
+      <!-- ⬇⬇ 肌群清單顯示位置 -->
+      <ul id="muscle-schedule" class="list-disc ml-6 text-blue-600 mb-4"></ul>
+
+      <div id="plan-content" class="space-y-4"></div>
+    </div>
+  
+  <script>
+    const exercises = [
+      '腿推', '臀推', '胸推', '槓鈴肩推', '啞鈴側平舉', '俯身飛鳥（啞鈴）',
+      '高位下拉', '集中彎舉', '斜板彎舉', '繩索下壓', '機械式捲腹'
+    ];
+
+    let globalUserData = {}; 
+
+    const tableBody = document.getElementById("exercise-table");
+    exercises.forEach(name => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="border px-2 py-1">${name}</td>
+        <td class="border px-2 py-1"><input class="border w-full p-1" type="number" name="${name}-weight"></td>
+        <td class="border px-2 py-1"><input class="border w-full p-1" type="number" name="${name}-reps"></td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    function nextStep() {
+      const name = document.getElementById('name').value.trim();
+      const age = Number(document.getElementById('age').value);
+      const height = Number(document.getElementById('height').value);
+      const weight = Number(document.getElementById('weight').value);
+      const level = document.getElementById('level').value;
+      const goal = document.querySelector('input[name="goal"]:checked')?.value || '';
+      const trainingDays = [...document.querySelectorAll('.training-day:checked')].map(cb => cb.value);
+      const selectedTargets = document.getElementById("target_muscles").value;
+      const targetMuscles = selectedTargets ? [selectedTargets] : [];
+
+      // 清除錯誤提示
+      document.querySelectorAll('.error-msg').forEach(el => el.classList.add('hidden'));
+
+      let hasError = false;
+      if (!name) { document.getElementById('error-name').classList.remove('hidden'); hasError = true; }
+      if (!age || age < 1) { document.getElementById('error-age').classList.remove('hidden'); hasError = true; }
+      if (!height || height < 1) { document.getElementById('error-height').classList.remove('hidden'); hasError = true; }
+      if (!weight || weight < 1) { document.getElementById('error-weight').classList.remove('hidden'); hasError = true; }
+      if (!level) { document.getElementById('error-level').classList.remove('hidden'); hasError = true; }
+      if (!goal) { document.getElementById('error-goal').classList.remove('hidden'); hasError = true; }
+      if (trainingDays.length < 3 || trainingDays.length > 5) {
+        document.getElementById('error-days').classList.remove('hidden'); hasError = true;
+      }
+
+      if (hasError) return;
+
+      globalUserData = {
+        name, age, height, weight, level, goal,
+        training_days_list: trainingDays,
+        target_muscles: targetMuscles
+      };
+
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('step2').classList.remove('hidden');
+    }
+
+
+
+    async function submitForm() {
+      let hasExerciseError = false;
+      const exerciseErrors = [];
+
+      const exercisesFilled = exercises.map(name => {
+        const weightInput = document.querySelector(`input[name='${name}-weight']`);
+        const repsInput = document.querySelector(`input[name='${name}-reps']`);
+        const weight = Number(weightInput.value);
+        const reps = Number(repsInput.value);
+
+        if (!weight || weight <= 0) {
+          weightInput.classList.add("border-red-500");
+          hasExerciseError = true;
+          exerciseErrors.push(`${name} 的重量`);
+        } else {
+          weightInput.classList.remove("border-red-500");
+        }
+
+        if (!reps || reps <= 0) {
+          repsInput.classList.add("border-red-500");
+          hasExerciseError = true;
+          exerciseErrors.push(`${name} 的次數`);
+        } else {
+          repsInput.classList.remove("border-red-500");
+        }
+
+        return { name, weight, reps };
+      });
+
+      if (hasExerciseError) {
+        alert("請完整填寫以下欄位：\n" + exerciseErrors.join("\n"));
+        return;
+      }
+
+      const payload = {
+        userData: globalUserData,
+        exercises: exercisesFilled
+      };
+
+      const res = await fetch('/generate-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      showResult(result);
+      }
+
+  function showResult(data) {
+  const resultDiv = document.getElementById('result');
+  const content = document.getElementById('plan-content');
+  const muscleList = document.getElementById('muscle-schedule'); // ← 修正：加入肌群清單 DOM
+
+  resultDiv.classList.remove('hidden');
+  content.innerHTML = '';
+  muscleList.innerHTML = ''; // ← 每次重算前先清空肌群清單
+
+  const dayMap = {
+    Day1: "星期一", Day2: "星期二", Day3: "星期三",
+    Day4: "星期四", Day5: "星期五", Day6: "星期六", Day7: "星期日"
+  };
+
+  // 加入每日肌群分配清單
+  if (data.muscle_schedule) {
+    for (const [day, muscles] of Object.entries(data.muscle_schedule)) {
+      const li = document.createElement('li');
+      const chineseDay = dayMap[day] || day;
+      li.textContent = `${chineseDay}：${muscles.join('、')}`;
+      muscleList.appendChild(li);
+    }
+  }
+
+  // 依照星期順序排序並產生每一天的訓練計畫
+  data.week.sort((a, b) => {
+    const numA = parseInt(a.day.replace("Day", ""));
+    const numB = parseInt(b.day.replace("Day", ""));
+    return numA - numB;
+  });
+
+  data.week.forEach(day => {
+    const dayBlock = document.createElement('div');
+    dayBlock.className = 'bg-white p-6 rounded-xl shadow-md';
+
+    const chineseDay = dayMap[day.day] || day.day;
+    const title = `<h3 class="text-xl font-semibold text-blue-700 mb-3">${chineseDay}</h3>`;
+
+    const listItems = day.exercises.map(e =>
+      `<li class="ml-5 list-disc text-gray-700">
+        ${e.name}｜大肌群：${e.major}，細項：${e.minor}<br>
+        ${e.sets} 組 * ${e.reps} 次，休息 ${e.rest} 秒，重量：${e.weight} kg，危險度:${e.risk}
+      </li>`
+    ).join('');
+
+    const list = `<ul class="space-y-2">${listItems}</ul>`;
+    dayBlock.innerHTML = title + list;
+    content.appendChild(dayBlock);
+    });
+  }
+  </script>
+</body>
+</html>
